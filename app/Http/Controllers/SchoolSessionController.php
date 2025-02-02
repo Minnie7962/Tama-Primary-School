@@ -2,32 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SchoolSession;
+use App\Http\Controllers\Controller;
+use App\Interfaces\SchoolSessionInterface;
+use App\Http\Requests\SchoolSessionStoreRequest;
+use App\Http\Requests\SchoolSessionBrowseRequest;
 
 class SchoolSessionController extends Controller
 {
-    public function index()
-    {
-        $sessions = SchoolSession::all(); // Fetch all sessions
-        return view('sessions.index', compact('sessions'));
+    protected $schoolSessionRepository;
+
+    /**
+    * Create a new Controller instance
+    * 
+    * @param SchoolSessionInterface $schoolSessionRepository
+    * @return void
+    */
+    public function __construct(SchoolSessionInterface $schoolSessionRepository) {
+        $this->schoolSessionRepository = $schoolSessionRepository;
     }
-    
-    public function store(Request $request)
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  SchoolSessionStoreRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(SchoolSessionStoreRequest $request)
     {
-        // Validate the request
-        $request->validate([
-            'session_name' => 'required|string|max:255',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-        ]);
+        try {
+            $this->schoolSessionRepository->create($request->validated());
 
-        // Create a new session
-        SchoolSession::create([
-            'session_name' => $request->session_name,
-        ]);
+            return back()->with('status', 'Session creation was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+        
+    }
 
-        // Redirect with a success message
-        return redirect()->route('sessions.index')->with('success', 'Session created successfully!');
+    /**
+     * Save the selected school session as current session for
+     * browsing.
+     *
+     * @param  SchoolSessionBrowseRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function browse(SchoolSessionBrowseRequest $request)
+    {
+        try {
+            $this->schoolSessionRepository->browse($request->validated());
+
+            return back()->with('status', 'Browsing session set was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+        
     }
 }

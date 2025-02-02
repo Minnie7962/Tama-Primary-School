@@ -10,9 +10,4 @@ class Semester extends Model
     use HasFactory;
 
     protected $fillable = ['semester_name', 'start_date', 'end_date', 'session_id'];
-
-    public function session()
-    {
-        return $this->belongsTo(SchoolSession::class);
-    }
 }

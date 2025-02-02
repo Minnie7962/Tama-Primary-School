@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('zip');
             $table->string('photo')->nullable();
             $table->string('birthday')->nullable();
-            $table->string('role');
+            $table->string('role')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

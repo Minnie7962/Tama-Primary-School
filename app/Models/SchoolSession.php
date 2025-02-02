@@ -10,9 +10,4 @@ class SchoolSession extends Model
     use HasFactory;
 
     protected $fillable = ['session_name'];
-
-    public function semesters()
-    {
-        return $this->hasMany(Semester::class);
-    }
 }

@@ -9,5 +9,8 @@ class Notice extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['notice', 'session_id'];
+    protected $fillable = [
+        'notice',
+        'session_id'
+    ];
 }

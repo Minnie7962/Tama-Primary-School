@@ -1,34 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
+use App\Interfaces\UserInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\PasswordChangeRequest;
 
 class UpdatePasswordController extends Controller
 {
-    public function edit()
+    protected $userRepository;
+
+    public function __construct(UserInterface $userRepository)
     {
+        $this->userRepository = $userRepository;
+    }
+
+    public function edit() {
         return view('auth.passwords.edit');
     }
 
-    public function update(Request $request)
-    {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+    public function update(PasswordChangeRequest $request) {
+        $request = $request->validated();
+        if (Hash::check($request['old_password'], auth()->user()->password)) {
+            // The passwords match...
+            try{
+                $this->userRepository->changePassword($request['new_password']);
 
-        $user = \App\Models\User::find(\Illuminate\Support\Facades\Auth::id());
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'The current password is incorrect']);
+                return back()->with('status', 'Changing password was successful!');
+            } catch (\Exception $e) {
+                return back()->withError($e->getMessage());
+            }
+        } else {
+            return back()->withError('Password mismatched!');
         }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        return redirect()->back()->with('success', 'Password updated successfully');
     }
 }
